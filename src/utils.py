@@ -10,41 +10,47 @@ from statsmodels.stats.proportion import proportions_ztest
 plt.rcParams.update({"font.size": 7})
 
 
-# define function for calculating sensitivity, specificity, PPV and NPV
-# calculate sensitivity: number of phenotypically resistant samples that are found to have a resistant mutation / total number of phenotypically resistant samples
-# calculate specificity: number of phenotypically sensitive samples that do not have a resistance mutation / total number of phenotypically sensitive samples
-# calculate PPV: number of samples with a resistance mutation that are phenotypically resistant / total number of samples with a resistance mutation
-# calculate NPV: number of samples without a resistance mutation that are phenotypically sensitive / total number of samples without a resistance mutation
-def calculate_statistics(df):
-    sensitivity = (
-        df[(df["IS_RESISTANT"]) & (df["HAS_RESISTANT_MUTATION"])].shape[0]
-        / df[df["IS_RESISTANT"]].shape[0]
-    )
-    specificity = (
-        df[(~df["IS_RESISTANT"]) & (~df["HAS_RESISTANT_MUTATION"])].shape[0]
-        / df[~df["IS_RESISTANT"]].shape[0]
-    )
-    PPV = (
-        df[(df["HAS_RESISTANT_MUTATION"]) & (df["IS_RESISTANT"])].shape[0]
-        / df[df["HAS_RESISTANT_MUTATION"] == True].shape[0]
-    )
-    NPV = (
-        df[(~df["HAS_RESISTANT_MUTATION"]) & (~df["IS_RESISTANT"])].shape[0]
-        / df[df["HAS_RESISTANT_MUTATION"] == False].shape[0]
-    )
-    return sensitivity, specificity, PPV, NPV
+def plot_compensation_barplot(
+    major_percentage,
+    minor_percentage,
+    save_name="contingency_barplot",
+    save_figure=False,
+):
 
+    # plot the two percentages as a nice bar plot
+    fig = plt.figure(figsize=(2.75, 2.5))
+    axis = fig.gca()
 
-# plot sensitivity and specificity for no FRS cutoff and for FRS cutoff >=0.9 (major allele definition) as a histogram
-def create_stats_df(sen_1, sen_2, spe_1, spe_2):
-    stats = pd.DataFrame(
-        {
-            "Metric": ["Sensitivity", "Specificity"],
-            "FRS cutoff >=0.9 (major allele definition)": [sen_1, spe_1],
-            "No FRS cutoff": [sen_2, spe_2],
-        }
+    axis.bar(
+        ["Homogeneous\nsamples", "Hetergeneous\nsamples"],
+        [major_percentage, minor_percentage],
+        color=["#377eb8", "#e41a1c"],
+        edgecolor=None,
     )
-    return stats
+    axis.set_ylabel("% with compensatory mutation")
+    axis.set_ylim(0, 0.5)
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+
+    # display percentages inside bars
+    for i in range(2):
+        axis.text(
+            i,
+            [major_percentage, minor_percentage][i] + 0.01,
+            f"{[major_percentage, minor_percentage][i]:.1%}",
+            ha="center",
+            va="bottom",
+            color="black",
+        )
+
+    # Set axes to display values as percentages without the percent sign
+    axis.yaxis.set_major_formatter(FuncFormatter(lambda y, _: "{:.0f}".format(y * 100)))
+
+    if save_figure:
+        # save figure in high resolution
+        fig.savefig(f"pdf/{save_name}.pdf", bbox_inches="tight", transparent=True)
+
+    plt.show()
 
 
 def plot_stats_histogram(
@@ -152,19 +158,13 @@ def plot_performance_frs(
     # plot sensitivity and specificity using one y axis
     ax1.plot(df.min_FRS, df[metrics[0]], label=metrics[0], color=colours[0])
     ax1.plot(df.min_FRS, df[metrics[1]], label=metrics[1], color=colours[1])
-    # plt.legend(fontsize=15)
-    ax1.set_xlabel("fraction of reads (FRS) supporting RAV (%)")
-    # plt.ylabel('%', fontsize=15)
-    # plt.title('Sensitivity and Specificity for different FRS cutoffs')
+    ax1.set_xlabel("Fraction of reads (FRS) supporting RAV")
 
     ax1.spines["top"].set_visible(False)
     ax1.spines["right"].set_visible(False)
     ax1.set_ylim(0.94, 0.99)
     ax1.set_yticks(np.arange(0.94, 0.99, 0.01))
     ax1.set_xlim(0, 1)
-    # increase tick label sizes
-    # plt.xticks(fontsize=15)
-    # plt.yticks(fontsize=15)
 
     # Set axes to display values as percentages without the percent sign
     plt.gca().yaxis.set_major_formatter(
@@ -234,19 +234,13 @@ def plot_histogram(
     # Set y-axis to display values as percentages without the percent sign
     ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: "{:.0f}".format(y * 100)))
 
-    # ax.set_title('Sensitivity and Specificity for Rifampicin Resistance', fontsize=18)
-    # ax.set_ylabel('%', fontsize=7)
     ax.set_ylim(0, 1.1)
 
     # Setting custom x-axis labels
     ax.set_xticks([r + bar_width / 2 for r in x])
     ax.set_xticklabels(metrics, fontsize=7)
 
-    # Increase axis fontsizes
     ax.tick_params(axis="both", which="major", labelsize=7)
-
-    # Adding the legend
-    # ax.legend(loc='lower right', fontsize=12)
 
     # remove unnecessary spines
     ax.spines["top"].set_visible(False)
@@ -296,9 +290,10 @@ def plot_histogram(
 
 def plot_frs_histogram(df, savefig=False, save_name="hist-FRS-RAV"):
 
-    axes = df.FRS.hist(bins=20, color="grey")
+    axes = df.MAX_RAV_FRS.hist(bins=np.arange(0.05, 1, 0.05), color="grey")
 
-    axes.set_xlabel("Fraction of reads supporting RAV (%)")
+    axes.set_ylabel("Number of samples")
+    axes.set_xlabel("Fraction of reads supporting RAV")
     axes.spines["top"].set_visible(False)
     axes.spines["right"].set_visible(False)
     axes.set_xlim(0, 1)
@@ -307,3 +302,58 @@ def plot_frs_histogram(df, savefig=False, save_name="hist-FRS-RAV"):
     fig.set_size_inches(3, 2)
     if savefig:
         fig.savefig(f"pdf/{save_name}.pdf", bbox_inches="tight", transparent=True)
+
+
+def calculate_results_row(df, description=None, min_FRS=None):
+
+    true_positives = int(
+        df[(df["IS_RESISTANT"]) & (df["HAS_RESISTANT_MUTATION"])].shape[0]
+    )
+    positives = int(df[df["IS_RESISTANT"]].shape[0])
+    false_positives = int(
+        df[(~df["IS_RESISTANT"]) & (df["HAS_RESISTANT_MUTATION"])].shape[0]
+    )
+
+    true_negatives = int(
+        df[(~df["IS_RESISTANT"]) & (~df["HAS_RESISTANT_MUTATION"])].shape[0]
+    )
+    negatives = int(df[~df["IS_RESISTANT"]].shape[0])
+    false_negatives = int(
+        df[(df["IS_RESISTANT"]) & (~df["HAS_RESISTANT_MUTATION"])].shape[0]
+    )
+
+    sensitivity = true_positives / positives
+    specificity = true_negatives / negatives
+    ppv = true_positives / (true_positives + false_positives)
+    npv = true_negatives / (true_negatives + false_negatives)
+
+    return pd.Series(
+        [
+            description,
+            min_FRS,
+            true_positives,
+            false_positives,
+            positives,
+            true_negatives,
+            false_negatives,
+            negatives,
+            sensitivity,
+            specificity,
+            ppv,
+            npv,
+        ],
+        index=[
+            "description",
+            "min_FRS",
+            "TP",
+            "FP",
+            "P",
+            "TN",
+            "FN",
+            "N",
+            "sensitivity",
+            "specificity",
+            "PPV",
+            "NPV",
+        ],
+    )
