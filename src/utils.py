@@ -22,7 +22,7 @@ def plot_compensation_barplot(
     axis = fig.gca()
 
     axis.bar(
-        ["Homogeneous\nsamples", "Hetergeneous\nsamples"],
+        ["Homogeneous\nsamples", "Heterogeneous\nsamples"],
         [major_percentage, minor_percentage],
         color=["#377eb8", "#e41a1c"],
         edgecolor=None,
@@ -246,6 +246,7 @@ def plot_histogram(
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
+    # perform statistical test for significant difference
     a = df.iloc[0]
     b = df.iloc[1]
     for i in range(len(metrics)):
@@ -267,12 +268,16 @@ def plot_histogram(
         if z < 0.05:
             print(metric, z, p)
             x_value = x[i]
-            ax.plot([x_value, x_value], [1.07, 1.09], color="black", lw=2)
-            ax.plot([x_value + 0.2, x_value + 0.2], [1.07, 1.09], color="black", lw=2)
-            ax.plot([x_value, x_value + 0.2], [1.09, 1.09], color="black", lw=2)
+            ax.plot(
+                [x_value + 0.025, x_value + 0.025], [1.08, 1.1], color="black", lw=2
+            )
+            ax.plot(
+                [x_value + 0.225, x_value + 0.225], [1.08, 1.1], color="black", lw=2
+            )
+            ax.plot([x_value + 0.025, x_value + 0.225], [1.1, 1.1], color="black", lw=2)
             ax.text(
-                x_value + 0.1,
-                1.1,
+                x_value + 0.125,
+                1.125,
                 "*",
                 fontsize=20,
                 color="black",
