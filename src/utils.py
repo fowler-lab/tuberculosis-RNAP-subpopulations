@@ -249,6 +249,7 @@ def plot_histogram(
     # perform statistical test for significant difference
     a = df.iloc[0]
     b = df.iloc[1]
+
     for i in range(len(metrics)):
         metric = metrics[i]
         if metric == "sensitivity":
@@ -265,7 +266,7 @@ def plot_histogram(
             nobs = [int(a.TN) + int(a.FN), int(b.TN) + int(b.FN)]
 
         z, p = proportions_ztest(counts, nobs)
-        if z < 0.05:
+        if p < 0.05:
             print(metric, z, p)
             x_value = x[i]
             ax.plot(
