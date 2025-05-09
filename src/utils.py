@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 from statsmodels.stats.proportion import proportions_ztest
+from statsmodels.stats.proportion import proportion_confint
 
 # make the default font size point 7
 plt.rcParams.update({"font.size": 7})
@@ -156,8 +157,18 @@ def plot_performance_frs(
     fig, ax1 = plt.subplots(figsize=(5, 3))
 
     # plot sensitivity and specificity using one y axis
-    ax1.plot(df.min_FRS, df[metrics[0]], label=metrics[0], color=colours[0])
-    ax1.plot(df.min_FRS, df[metrics[1]], label=metrics[1], color=colours[1])
+    for i in [0, 1]:
+        ax1.errorbar(
+            df.min_FRS,
+            df[metrics[i]],
+            yerr=df[metrics[i] + "_error"],
+            label=metrics[i],
+            color=colours[i],
+            elinewidth=1.0,
+            linewidth=0.5,
+            marker="o",
+            markersize=3,
+        )
     ax1.set_xlabel("Fraction of reads (FRS) supporting RAV")
 
     ax1.spines["top"].set_visible(False)
@@ -329,9 +340,47 @@ def calculate_results_row(df, description=None, min_FRS=None):
     )
 
     sensitivity = true_positives / positives
+
+    # only need to calculate one direction as the numbers are sufficient large the limits are symmetric
+    sensitivity_error = [
+        abs(i - sensitivity)
+        for i in proportion_confint(
+            true_positives, positives, alpha=0.05, method="normal"
+        )
+    ][0]
+
     specificity = true_negatives / negatives
+
+    specificity_error = [
+        abs(i - specificity)
+        for i in proportion_confint(
+            true_negatives, negatives, alpha=0.05, method="normal"
+        )
+    ][0]
+
     ppv = true_positives / (true_positives + false_positives)
+
+    ppv_error = [
+        abs(i - ppv)
+        for i in proportion_confint(
+            true_positives,
+            true_positives + false_positives,
+            alpha=0.05,
+            method="normal",
+        )
+    ][0]
+
     npv = true_negatives / (true_negatives + false_negatives)
+
+    npv_error = [
+        abs(i - npv)
+        for i in proportion_confint(
+            true_negatives,
+            true_negatives + false_negatives,
+            alpha=0.05,
+            method="normal",
+        )
+    ][0]
 
     return pd.Series(
         [
@@ -347,6 +396,10 @@ def calculate_results_row(df, description=None, min_FRS=None):
             specificity,
             ppv,
             npv,
+            specificity_error,
+            sensitivity_error,
+            ppv_error,
+            npv_error,
         ],
         index=[
             "description",
@@ -361,5 +414,9 @@ def calculate_results_row(df, description=None, min_FRS=None):
             "specificity",
             "PPV",
             "NPV",
+            "sensitivity_error",
+            "specificity_error",
+            "PPV_error",
+            "NPV_error",
         ],
     )
