@@ -34,6 +34,13 @@ And you can step through the different code cells as above using the "play" butt
 
 Running the entire notebook should take no more than a few minutes.
 
-## Source of data
-As mentioned in the manuscript, the data tables included in this repository are extracts from [v3.0.0](https://doi.org/10.5281/zenodo.16041005) of the CRyPTIC Consortium Dataset.
+## Sources of data
+As mentioned in the manuscript, the data tables for the samples included in this repository are extracts from [v3.0.0](https://doi.org/10.5281/zenodo.16041005) of the CRyPTIC Consortium Dataset whilst the list of compensatory mutations was taken from this publication
+
+Brunner VM, Fowler PW (2024) *Compensatory mutations are associated with increased in vitro growth in resistant clinical samples of Mycobacterium tuberculosis.* mGen 10:001187 [doi:10.1099/mgen.0.001187](https://doi.org/10.1099/mgen.0.001187)
+
+That publication list also has an [attendant GitHub repository](https://github.com/fowler-lab/tb-rnap-compensation) which contains the list.
+
+
+
 
