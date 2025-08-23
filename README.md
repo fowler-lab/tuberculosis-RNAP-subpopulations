@@ -5,9 +5,10 @@ https://colab.research.google.com/github/fowler-lab/tuberculosis-RNAP-subpopulat
 # tuberculosis-RNAP-subpopulations
 This repository contains a juypter-notebook, attendant code and data allowing all analysis and (nearly all) figures in the below preprint to be reproduced:
 
-Brunner VM, Fowler PW
-**Subpopulations in clinical samples of M. tuberculosis can give rise to rifampicin resistance and shed light on how resistance is acquired**
+Brunner VM, Fowler PW (2025) *Subpopulations in clinical samples of M. tuberculosis can give rise to rifampicin resistance and shed light on how resistance is acquired.*
 bioRxiv preprint [doi:10.1101/2025.04.09.647945](https://doi.org/10.1101/2025.04.09.647945)
+
+This reference will be updated when the manuscript is published in a peer-reviewed journal.
 
 ## Instructions
 
@@ -18,15 +19,15 @@ The easiest way is to click the blue `Open in Colab` button at the top left of t
 You need have installed a number of standard Python packages -- many of these are common (e.g. `numpy`) so you may already have a version installed. To install these locally using `pip` issue
 
 ```
-$ git clone git@github.com:fowler-lab/tuberculosis-RNAP-subpopulations.git
-$ cd tuberculosis-RNAP-subpopulations/
-$ pip install -r requirements.txt
+git clone git@github.com:fowler-lab/tuberculosis-RNAP-subpopulations.git
+cd tuberculosis-RNAP-subpopulations/
+pip install -r requirements.txt
 ```
 
 Then you will need to open the notebook using your IDE of choice. For example, to open in VS Code
 
 ```
-$ code -n notebook.ipynb
+code -n notebook.ipynb
 ```
 
 And you can step through the different code cells as above using the "play" buttons.
