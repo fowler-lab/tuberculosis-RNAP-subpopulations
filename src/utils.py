@@ -298,13 +298,15 @@ def plot_histogram(
         df.iloc[1][metrics[0]],
         width=bar_width,
         color="white",
+        facecolor="none",
         edgecolor=colours[0],
     )
     b4 = ax.bar(
         0.95,
         df.iloc[1][metrics[1]],
         width=bar_width,
-        color="white",
+        # color="white",
+        facecolor="none",
         edgecolor=colours[1],
     )
 
@@ -382,7 +384,12 @@ def plot_histogram(
 
     # save figure if print_stats is True
     if save_figure:
+        fig.patch.set_facecolor("none")
+        ax.set_facecolor("none")
         fig.savefig(f"pdf/{save_name}.pdf", bbox_inches="tight", transparent=True)
+        fig.savefig(
+            f"pdf/{save_name}.png", bbox_inches="tight", transparent=True, dpi=600
+        )
 
 
 def plot_frs_histogram(df, savefig=False, save_name="hist-FRS-RAV"):
