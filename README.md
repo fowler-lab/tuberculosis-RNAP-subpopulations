@@ -1,8 +1,8 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
-https://colab.research.google.com/github/fowler-lab/tuberculosis-RNAP-subpopulations/blob/main/analysis_refactored.ipynb
+https://colab.research.google.com/github/fowler-lab/tb-rnap-subpopulations/blob/main/notebook.ipynb
 )
 
-# tuberculosis-RNAP-subpopulations
+# tb-rnap-subpopulations
 This repository contains a juypter-notebook, attendant code and data allowing all analysis and (nearly all) figures in the below preprint to be reproduced:
 
 Brunner VM, Fowler PW (2025) *Subpopulations in clinical samples of M. tuberculosis can give rise to rifampicin resistance and shed light on how resistance is acquired.*
